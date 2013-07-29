@@ -112,13 +112,19 @@ describe ("lib.cache", function() {
         var timeout = 100;
         cache.set("foo2", "bar2", timeout);
 
+        assert.equal(3, cache.length);
+
         cache.on("expired", function(item) {
 
             assert.equal("foo2", item.key);
             assert.equal("bar2", item.value);
-
-            assert.ok(timeout < new Date().getTime() - now);
+;
+            var delta =new Date().getTime() - now;  
+            assert.ok( timeout < delta);
+            assert.ok( timeout*2 > delta);
             assert.equal(2, cache.length);
+
+            assert.equal(null, cache.get("foo2"));
             
             cache.clean();
             done();
