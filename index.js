@@ -42,6 +42,16 @@ var Cache = function(options) {
       get : function(){ return _length; }
     });
 
+
+    /* 
+    * Returns all keys.
+    * @api public
+    */  
+    Object.defineProperty(this, "keys", {
+      enumerable: true,
+      get : function(){ return Object.keys(cache); }
+    });
+
     /*
     * Inserts or updates an entry into the cache.
     * @param key        {string} Required. 

@@ -202,4 +202,16 @@ describe ("lib.cache", function() {
         assert.equal(0, cache.length);
         done();
     });
+
+    it ("should be able to get all keys", function (done) {
+        var cache = new Cache();        
+        cache.set("foo0", "bar0");
+        cache.set("foo1", "bar1");
+        
+        var keys = cache.keys;
+        assert.equal(2, keys.length);
+        assert.equal("foo0", keys[0]);
+        assert.equal("foo1", keys[1]);
+        done();
+    });
 });
