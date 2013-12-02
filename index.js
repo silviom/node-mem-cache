@@ -88,14 +88,12 @@ var Cache = function(options) {
     */   
     this.remove =function (key) {
         var item = cache[key];
-        _length --;
+        if (!item) return null; 
 
-        if (item) {
-            if (!config.timeoutDisabled) removeExpiration(item);
-            delete cache[key];
-            return item.value;
-        }
-        return null;
+        _length --;
+        if (!config.timeoutDisabled) removeExpiration(item);
+        delete cache[key];
+        return item.value;
     };
 
     /*

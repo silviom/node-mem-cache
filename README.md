@@ -44,10 +44,13 @@ A simple in-memory cache for node.js
 
 ### Properties
 
+#### keys 
+*Returns an string array containing all items' keys. It will include keys of items that are expired but weren't been removed yet.
+
 #### length 
 * Property that returns the current number of entries in the cache
 
 ### Events
 
 #### expired 
-* This event will be emitted for every cache entry that was removed because timeout
+* This event will be emitted for every cache entry that was removed because timed out
