@@ -4,10 +4,10 @@ var util    = require("util");
 /*
 * This class a key/value cache on memory.
 * A timeout will be added to each entry.
-* When a timeout happens for a single entry, the event 'expired' 
+* When a timeout happens for a single entry, the event 'expired'
 * will be rised with the pair key/value as argument.
 * When an entry was query or updated, its timeout will be reseted.
-* @param options {object} Optional configuration options. 
+* @param options {object} Optional configuration options.
 *   - timeout               {number}  Optional. Specifies in ms the default timeout for each entry. Default 60000 ms.
 *   - doesNotRenewTimeout   {boolean} Optional. Specifies if entries's timeout should be reseted after each query or update. Default false.
 *   - timeoutDisabled       {boolean} Optional. Enable/diable timeout feature. If timeout feature is desable, items will not expire. Default false.
@@ -24,7 +24,7 @@ var Cache = function(options) {
     var self = this;        // Self reference
     var cache = {};         // Entries by key
     var _length = 0;        // Internal counter of cache's entries
-    var expirations = [];   // Entries by sorted ascending by expiration time nad sequence. 
+    var expirations = [];   // Entries by sorted ascending by expiration time nad sequence.
     var sequence = 0;       // Internal counter for sorting entries within 'expirations' array.
     var timerId = null;     // Reference to timer
     var config = {          // Global configuration
@@ -33,20 +33,20 @@ var Cache = function(options) {
         timeoutDisabled: options.timeoutDisabled || false
     };
 
-    /* 
+    /*
     * Returns the number of entries that the cache contains.
     * @api public
-    */  
+    */
     Object.defineProperty(this, "length", {
       enumerable: true,
       get : function(){ return _length; }
     });
 
 
-    /* 
+    /*
     * Returns all keys.
     * @api public
-    */  
+    */
     Object.defineProperty(this, "keys", {
       enumerable: true,
       get : function(){ return Object.keys(cache); }
@@ -54,11 +54,11 @@ var Cache = function(options) {
 
     /*
     * Inserts or updates an entry into the cache.
-    * @param key        {string} Required. 
+    * @param key        {string} Required.
     * @param value      {any}    Required.
     * @param timeout    {number} Optional. Specifies in milliseconds the timeout for this entry.
     * @api public
-    */   
+    */
     this.set = function (key, value, timeout) {
         var current = cache[key];
         if (current) {
@@ -83,12 +83,12 @@ var Cache = function(options) {
 
     /*
     * Removes an entry from the cache.
-    * @param key    {string} Required. 
+    * @param key    {string} Required.
     * @api public
-    */   
+    */
     this.remove =function (key) {
         var item = cache[key];
-        if (!item) return null; 
+        if (!item) return null;
 
         _length --;
         if (!config.timeoutDisabled) removeExpiration(item);
@@ -98,10 +98,10 @@ var Cache = function(options) {
 
     /*
     * Gets an entry's value by its key.
-    * @param key    {string}    Required. 
+    * @param key    {string}    Required.
     * @return       {any}       Returns entry's value or null if entry was not found
     * @api public
-    */   
+    */
     this.get = function (key) {
         var item = cache[key];
         if (item) {
@@ -112,7 +112,7 @@ var Cache = function(options) {
             return item.value;
         }
         return null;
-    }
+    };
 
     /*
     * Removes all entries from the cache
@@ -127,7 +127,7 @@ var Cache = function(options) {
         cache = {};
         expirations = [];
         _length = 0;
-    }   
+    };
 
     // adds an entry to expirations array
     var addExpiration = function (item) {
@@ -176,7 +176,7 @@ var Cache = function(options) {
 
             // Stops when find a non expired item
             if (item.expires > now) {
-                
+
                 // Sets timer for no expired item
                 setItemTimeout(item);
 
@@ -184,12 +184,16 @@ var Cache = function(options) {
                 expirations = expirations.slice(index);
                 break;
             }
+            // All remaining expirations may need to be removed...
+            else if( index == expirations.length-1 && item.expires <= now) {
+                expirations = expirations.slice(index+1);
+            }
 
             // Adds expired entry to collection of expired items
-            itemsToEmit.push(item); 
+            itemsToEmit.push(item);
 
             // Removes expired entry from cache
-            delete cache[item.key]; 
+            delete cache[item.key];
         }
 
         // Updates length property
@@ -197,12 +201,12 @@ var Cache = function(options) {
 
         // Emits 'expired' event for each expired item
         itemsToEmit.forEach( function( item ) {
-            self.emit("expired", { 
+            self.emit("expired", {
                 key: item.key,
-                value: item.value 
+                value: item.value
             });
         });
-    }
+    };
 
     // Internal function that compares two entries's timeouts
     var itemComparer = function(a, b) {
@@ -210,7 +214,7 @@ var Cache = function(options) {
         if (!a && b) return 1;
         if (b.expires === a.expires) {
             return a.sequence - b.sequence;
-        };
+        }
 
         return a.expires - b.expires;
     };
@@ -220,7 +224,7 @@ var Cache = function(options) {
          var low = 0, up = expirations.length,  middle, result;
 
          while ( low <= up ) {
-            
+
             middle = (low + up)  >> 1;
             result = itemComparer(value, expirations[middle]);
 
@@ -241,7 +245,7 @@ var Cache = function(options) {
          var low = 0, up = expirations.length, count = up, middle, result;
 
          while ( low <= up ) {
-            
+
             middle = (low + up)  >> 1;
             result = itemComparer(value, expirations[middle]);
 
@@ -258,7 +262,7 @@ var Cache = function(options) {
          return low>count ? count : low;
     };
 
-}
+};
 
 // Cache inherits from EventEmitter
 util.inherits(Cache, events.EventEmitter);
