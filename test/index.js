@@ -42,7 +42,7 @@ describe ("lib.cache", function() {
         var value = cache.get("foo2");
         assert.equal("bar2", value);
         assert.equal(5, cache.length);
-        
+
         cache.clean();
         done();
     });
@@ -57,7 +57,7 @@ describe ("lib.cache", function() {
 
         var value = cache.get("baz");
         assert.equal(null, value);
-        
+
         cache.clean();
         done();
     });
@@ -77,12 +77,10 @@ describe ("lib.cache", function() {
         var value = cache.get("foo1");
         assert.equal(value, "baz");
         assert.equal(5, cache.length);
-        
+
         cache.clean();
         done();
     });
-
-
 
     it ("should be able to remove a value by its key", function (done) {
 
@@ -96,16 +94,17 @@ describe ("lib.cache", function() {
         var value = cache.remove("foo2");
         assert.equal(value, "bar2");
         assert.equal(4, cache.length);
-        
+
         cache.clean();
         done();
     });
+
 
     it ("should expire an item by timeout", function (done) {
 
         var now = new Date().getTime();
 
-        var cache = new Cache();        
+        var cache = new Cache();
         cache.set("foo0", "bar0");
         cache.set("foo1", "bar1");
 
@@ -118,22 +117,73 @@ describe ("lib.cache", function() {
 
             assert.equal("foo2", item.key);
             assert.equal("bar2", item.value);
-;
-            var delta =new Date().getTime() - now;  
+
+            var delta =new Date().getTime() - now;
             assert.ok( timeout < delta);
             assert.ok( timeout*2 > delta);
             assert.equal(2, cache.length);
 
             assert.equal(null, cache.get("foo2"));
-            
+
             cache.clean();
             done();
         });
     });
 
+
+    it ("should expire new items added after expiring all items in cache", function (done) {
+
+        var expiredEventCount=0;
+
+        var now = new Date().getTime();
+
+        var cache = new Cache();
+        var timeout = 100;
+        cache.set("foo0", "bar0", timeout);
+        cache.set("foo1", "bar1", timeout);
+
+        assert.equal(2, cache.length);
+
+        cache.on("expired", function (item) {
+            expiredEventCount++;
+
+            assert.ok(item.key === "foo0" || item.key == "foo1");
+            if(item.key === "foo0") {
+                assert.equal("bar0", item.value);
+                assert.equal(null, cache.get("foo0"));
+
+            } else if (item.key === "foo1") {
+                assert.equal("bar1", item.value);
+                assert.equal(null, cache.get("foo1"));
+            }
+
+            // On second event - add a new item, and wait for it to expire
+            //    (it won't without Stuart's bugfix)
+            if(expiredEventCount == 2) {
+                cache.removeAllListeners("expired"); // remove this callback
+
+                cache.set("foo2", "bar2", timeout);
+                assert.equal(1, cache.length);
+
+                cache.on("expired", function (newitem) {
+                    expiredEventCount++;
+
+                    assert.equal("foo2", newitem.key);
+                    assert.equal("bar2", newitem.value);
+                    assert.equal(0, cache.length);
+                    assert.equal(null, cache.get("foo2"));
+
+                    assert.equal(3, expiredEventCount);
+                    cache.clean();
+                    done();
+                });
+            }
+        });
+    });
+
     it ("should not expire an item if timeouts are disabled", function (done) {
         var cache = new Cache({ timeoutDisabled: true });
-        
+
         cache.on("expired", function(item) {
             throw new Error("Should not expire items!!");
         });
@@ -145,13 +195,13 @@ describe ("lib.cache", function() {
         cache.set("foo2", "bar2", timeout);
 
         setTimeout( function() {
-            
+
             var value = cache.get("foo2");
             assert.equal("bar2", value);
-            
+
             cache.clean();
             done();
-        
+
         }, timeout * 2);
     });
 
@@ -160,7 +210,7 @@ describe ("lib.cache", function() {
 
         var now = new Date().getTime();
 
-        var cache = new Cache({ doesNotRenewTimeout: false });        
+        var cache = new Cache({ doesNotRenewTimeout: false });
         cache.set("foo0", "bar0");
         cache.set("foo1", "bar1");
 
@@ -168,15 +218,15 @@ describe ("lib.cache", function() {
         cache.set("foo2", "bar2", timeout);
 
         setTimeout( function() {
-            
+
             var value = cache.get("foo2");
             assert.equal("bar2", value);
-        
+
             setTimeout( function() {
-                
+
                 var value = cache.get("foo2");
                 assert.equal("bar2", value);
-            
+
             }, timeout * 2/3);
         }, timeout * 2/3);
 
@@ -186,7 +236,7 @@ describe ("lib.cache", function() {
 
             assert.ok(timeout + timeout * 4/3 < new Date().getTime() - now);
             assert.equal(2, cache.length);
-            
+
             cache.clean();
             done();
         });
@@ -194,7 +244,7 @@ describe ("lib.cache", function() {
     });
 
     it ("should be able to clean the cache", function (done) {
-        var cache = new Cache();        
+        var cache = new Cache();
         cache.set("foo0", "bar0");
         cache.set("foo1", "bar1");
         assert.equal(2, cache.length);
@@ -204,10 +254,10 @@ describe ("lib.cache", function() {
     });
 
     it ("should be able to get all keys", function (done) {
-        var cache = new Cache();        
+        var cache = new Cache();
         cache.set("foo0", "bar0");
         cache.set("foo1", "bar1");
-        
+
         var keys = cache.keys;
         assert.equal(2, keys.length);
         assert.equal("foo0", keys[0]);
