@@ -39,7 +39,7 @@ A simple in-memory cache for node.js
 #### remove = function(key)
 * Deletes the value and its key from the cache
 
-#### clear = function()
+#### clean = function()
 * Deletes cache's entries all keys
 
 ### Properties
