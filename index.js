@@ -62,7 +62,7 @@ var Cache = function(options) {
     this.set = function (key, value, timeout) {
         var current = cache[key];
         if (current) {
-            if (!config.timeoutDisabled) removeExpiration(current);
+            shouldRemoveExpiration(current);
         } else {
             _length++;
         }
@@ -91,7 +91,7 @@ var Cache = function(options) {
         if (!item) return null;
 
         _length --;
-        if (!config.timeoutDisabled) removeExpiration(item);
+        shouldRemoveExpiration(item);
         delete cache[key];
         return item.value;
     };
@@ -129,6 +129,9 @@ var Cache = function(options) {
         _length = 0;
     };
 
+    // no operation function
+    var noop = function() {};
+
     // adds an entry to expirations array
     var addExpiration = function (item) {
         item.expires = new Date().getTime() + item.timeout;
@@ -146,6 +149,8 @@ var Cache = function(options) {
             expirations.splice(index, 1);
         }
     };
+
+    var shouldRemoveExpiration = config.timeoutDisabled ? noop : removeExpiration;
 
     // sets expiration timer for an item
     var setItemTimeout = function (item) {
