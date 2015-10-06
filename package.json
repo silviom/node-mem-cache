@@ -1,6 +1,6 @@
 {
   "name": "mem-cache",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "simple in memory key/value cache with autoclean by timeout",
   "main": "index.js",
   "scripts": {
@@ -16,8 +16,7 @@
   ],
   "author": "Silvio Massari <silvio.massari@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "mocha": "1.11.0"
   }
