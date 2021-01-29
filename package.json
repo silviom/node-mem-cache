@@ -18,6 +18,6 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "mocha": "1.11.0"
+    "mocha": "^8.2.1"
   }
 }
