@@ -160,7 +160,7 @@ var Cache = function(options) {
         }
 
         var timeout = item.expires - new Date().getTime();
-        timerId = setTimeout(onTimer, timeout < 10 ? 10 : timeout);
+        timerId = setTimeout(onTimer, timeout < 10 ? 10 : timeout).unref();
     };
 
     // on timer event, emits one event 'expired' for each entry at expirations array that are expired.
